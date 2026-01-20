@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Signature - Dynapps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Palette Dynapps */
+            --sunset-tangerine: #FF911F;
+            --orange-oetans: #F65836;
+            --ferrari-carmine: #F13C42;
+            --midnight-denim: #010114;
+            --unicorn-violet: #7B00DC;
+            
+            /* Extended palette */
+            --orange-light: #FF7E23;
+            --coral: #FF7759;
+            --pink-coral: #FF575D;
+            --violet-light: #951CF3;
+            --dark-blue: #050543;
+            
+            /* Gradient */
+            --gradient-primary: linear-gradient(45deg, #F13C42 0%, #F65836 35%, #FF911F 100%);
+            --gradient-dark: linear-gradient(45deg, #010114 0%, #050543 100%);
+        }
+
+        body {
+            font-family: 'Readex Pro', sans-serif;
+            background: var(--midnight-denim);
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background decorative elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -20%;
+            right: -10%;
+            width: 500px;
+            height: 500px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: var(--unicorn-violet);
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.2;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--gradient-primary);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 28px;
+            box-shadow: 0 8px 32px rgba(255, 145, 31, 0.3);
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: 700;
+            color: white;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            letter-spacing: 0.3px;
+        }
+
+        label .optional {
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: 400;
+            font-size: 12px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Readex Pro', sans-serif;
+            color: white;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--sunset-tangerine);
+            background: rgba(255, 145, 31, 0.05);
+            box-shadow: 0 0 0 4px rgba(255, 145, 31, 0.15);
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        input.invalid {
+            border-color: var(--ferrari-carmine);
+            background: rgba(241, 60, 66, 0.05);
+        }
+
+        input.valid {
+            border-color: #10B981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            margin-top: 6px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-hint.error {
+            color: var(--pink-coral);
+        }
+
+        .input-hint.success {
+            color: #10B981;
+        }
+
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 50px;
+        }
+
+        select option {
+            background: var(--midnight-denim);
+            color: white;
+            padding: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .card {
+                padding: 24px;
+            }
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Readex Pro', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 145, 31, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-section {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .preview-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 20px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .preview-box {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            min-height: 200px;
+            overflow-x: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            padding: 14px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error {
+            background: rgba(241, 60, 66, 0.15);
+            border: 1px solid rgba(241, 60, 66, 0.3);
+            color: #FF575D;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10B981;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            margin: 30px 0;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 13px;
+        }
+
+        .footer a {
+            color: var(--sunset-tangerine);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">D</div>
+                <div class="logo-text">dyna<span>pps</span></div>
+            </div>
+            <p class="subtitle">Générateur de Signature Email</p>
+        </div>
+
+        <div class="card">
+            <div class="message error" id="error"></div>
+            <div class="message success" id="success"></div>
+
+            <form id="signatureForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="prenom">Prénom</label>
+                        <input type="text" id="prenom" name="prenom" placeholder="Jean-Pierre" required>
+                        <div class="input-hint" id="prenomHint">Sera formaté : Première lettre en majuscule</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <input type="text" id="nom" name="nom" placeholder="Dupont" required>
+                        <div class="input-hint" id="nomHint">Sera formaté : Tout en majuscule</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Rôle / Fonction</label>
+                    <input type="text" id="role" name="role" placeholder="Consultant Odoo, Développeur, Chef de projet..." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+                    <input type="email" id="email" name="email" placeholder="jean.dupont@dynapps.fr" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="telephone">Téléphone <span class="optional">(facultatif)</span></label>
+                        <input type="tel" id="telephone" name="telephone" placeholder="06 12 34 56 78">
+                        <div class="input-hint" id="telephoneHint">Format accepté : 06 12 34 56 78 ou +33 6 12 34 56 78</div>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn">🚀 Générer la signature</button>
+                <button type="button" class="btn btn-secondary" id="copyBtn" style="display: none;">📋 Copier le code HTML</button>
+            </form>
+
+            <div class="preview-section" id="previewSection">
+                <div class="section-divider"></div>
+                <div class="preview-title">Aperçu de la signature</div>
+                <div class="preview-box" id="previewBox"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Experts in Odoo · <a href="https://www.dynapps.fr" target="_blank">dynapps.fr</a></p>
+        </div>
+    </div>
+
+    <script>
+        // ╔════════════════════════════════════════════════════════════════════════╗
+        // ║                                                                        ║
+        // ║                        ⚙️ CONFIGURATION                                ║
+        // ║                                                                        ║
+        // ║   Modifiez cette section pour personnaliser l'application              ║
+        // ║                                                                        ║
+        // ╚════════════════════════════════════════════════════════════════════════╝
+
+        const CONFIG = {
+
+            // ──────────────────────────────────────────────────────────────────────
+            // 📝 TEMPLATE DE SIGNATURE
+            // ──────────────────────────────────────────────────────────────────────
+            // Variables disponibles :
+            //   {{PRENOM}}    - Prénom de l'utilisateur (formaté automatiquement)
+            //   {{NOM}}       - Nom de l'utilisateur (formaté automatiquement en MAJUSCULES)
+            //   {{ROLE}}      - Rôle / Fonction
+            //   {{EMAIL}}     - Adresse email
+            //   {{TELEPHONE}} - Numéro de téléphone formaté +33 X XX XX XX XX
+            //
+            // Blocs conditionnels :
+            //   {{#TELEPHONE}}...{{/TELEPHONE}} - Affiché uniquement si téléphone renseigné
+
+            TEMPLATE: `
+
+<div class="elementToProof" id="Signature">
+
+    <table style="width: 593.75pt; box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;"
+        cellpadding="0" id="table_0">
+        <tbody>
+            <tr>
+                <td style="border-right: 1pt solid rgb(255, 145, 31); padding: 0.75pt 7.5pt; width: 93.75pt; height:
+                    110.25pt;">
+                    <p style="text-align: center; margin: 0cm; font-family: Aptos, sans-serif; font-size: 12pt;"
+                        class="elementToProof">
+                        <span style="font-family: Verdana, sans-serif; font-size: 10pt; color: blue;"><a
+                                style="text-decoration: none; margin-top: 0px; margin-bottom: 0px;"
+                                title="https://www.dynapps.fr" id="anchor-e1f4ff76-1991-f31e-7f44-a4c178a01889"
+                                href="https://www.dynapps.fr"><img style="width: 116px; height: 103px; margin:
+                                    0px;" height="103" width="116" id="image_0" alt="Logo"
+                                    src="https://portail.dynapps.fr/r/7Hw2"></a></span>
+                    </p>
+                    <p style="text-align: center; margin: 0cm; font-family: Aptos, sans-serif; font-size: 12pt;"
+                        class="elementToProof">
+                        <span style="font-family: Verdana, sans-serif; font-size: 10pt; color: blue;"><a
+                                style="color: blue; margin-top: 0px; margin-bottom: 0px;"
+                                data-outlook-id="14ba6471-b801-452e-830f-1419b2c2432f"
+                                id="anchor-5a762942-bf5f-dbb8-0660-a666b00a8a99"
+                                href="https://www.dynapps.eu/en/blog/2/dynapps-wins-best-odoo-partner-europe-2024-715"><img
+                                    style="width: 184px; height:58px; margin-top: 0px; margin-bottom: 0px;" height="58"
+                                    width="184" alt="best partner europe 2024"
+                                    src="https://portail.dynapps.fr/r/wPq2"></a></span>
+                    </p>
+                </td>
+                <td style="padding: 0.75pt 0.75pt 0.75pt 7.5pt; width: 284.7pt; height: 110.25pt;">
+                    <table style="box-sizing: border-box; border-collapse: collapse; border-spacing: 0px;"
+                        cellpadding="0" id="table_1">
+                        <tbody>
+                            <tr>
+                                <td style="padding: 0.75pt 0.75pt 3.75pt 7.5pt; vertical-align: top; width:
+                                    308.906px; height: 19.95pt; box-sizing: border-box;">
+                                    <p style="margin: 0cm; font-family: Aptos, sans-serif; font-size:
+                                        12pt;" class="elementToProof">
+                                        <span style="font-family: Verdana, sans-serif; font-size: 13pt; color:
+                                            rgb(243, 144, 29);"><b>{{PRENOM}} {{NOM}}</b></span>
+                                    </p>
+                                    <p style="margin: 0cm; font-family: Aptos, sans-serif; font-size:
+                                        12pt;" class="elementToProof">
+                                        <span
+                                            style="font-family: Verdana, sans-serif; font-size: 10pt; color: rgb(0,0, 0);"><b>{{ROLE}}</b></span>
+                                    </p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 3.75pt 0.75pt 3.75pt 7.5pt; vertical-align: top; width:
+                                    308.906px; height: 71.25pt; box-sizing: border-box;">
+                                    <p style="line-height: 12.75pt; margin: 0cm 0cm 12pt; font-family:
+                                        Aptos,sans-serif; font-size: 12pt;" class="elementToProof">
+                                        <span style="font-family: Verdana, sans-serif; font-size: 10pt; color:
+                                            black;">Dynapps
+                                        </span>
+                                        <span style="font-family: Verdana, sans-serif;
+                                            font-size: 10pt; color: rgb(68, 68, 68);">&nbsp;<br>
+                                        </span>
+                                        <span style="font-family: Verdana, sans-serif; font-size: 10pt; color:
+                                            rgb(0, 0, 0);"><a style="margin-top: 0px; margin-bottom: 0px;"
+                                                title="mailto:{{EMAIL}}"
+                                                href="mailto:{{EMAIL}}">{{EMAIL}}</a></span><span
+                                            style="font-family:Verdana, sans-serif; font-size: 10pt; color: rgb(255,
+                                            145, 31);">&nbsp;&nbsp;|
+                                        </span>
+                                        <span style="font-family: Verdana, sans-serif; font-size: 10pt; color:
+                                            rgb(0, 0, 0);"><a style="margin-top: 0px; margin-bottom: 0px;"
+                                                title="http://www.dynapps.fr/"
+                                                href="http://www.dynapps.fr/">dynapps.fr</a>
+                                        </span>
+                                        {{#TELEPHONE}}<span style="font-family: Verdana, sans-serif; font-size: 10pt;
+                                                    color: rgb(68, 68, 68);"><br>
+                                        </span>
+                                        <span style="font-family: Verdana, sans-serif; font-size: 10pt;
+                                                    color: rgb(0, 0, 0);"><a style="margin-top: 0px; margin-bottom:
+                                                        0px;" title="tel:{{TELEPHONE}}" href="tel:{{TELEPHONE}}">{{TELEPHONE}}</a>
+                                        </span>{{/TELEPHONE}}
+                                        <span
+                                            style="font-family: Verdana,sans-serif; font-size: 10pt; color: black;">&nbsp;
+                                        </span>
+                                    </p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+            `
+        };
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // ⛔ NE PAS MODIFIER EN DESSOUS DE CETTE LIGNE
+        // ══════════════════════════════════════════════════════════════════════════
+
+        let generatedHTML = '';
+
+        // ──────────────────────────────────────────────────────────────────────────
+        // 👤 FORMATAGE PRÉNOM ET NOM
+        // ──────────────────────────────────────────────────────────────────────────
+
+        /**
+         * Formate le prénom : première lettre de chaque mot en majuscule
+         * Gère les espaces ET les tirets (Jean-Pierre, Marie Claire)
+         * @param {string} prenom - Le prénom à formater
+         * @returns {string} - Le prénom formaté
+         */
+        function formaterPrenom(prenom) {
+            if (!prenom) return '';
+            
+            return prenom
+                .toLowerCase()
+                .split(/(\s+|-)/) // Sépare par espaces ou tirets, garde les séparateurs
+                .map(part => {
+                    if (part === '-' || part.trim() === '') return part;
+                    return part.charAt(0).toUpperCase() + part.slice(1);
+                })
+                .join('');
+        }
+
+        /**
+         * Formate le nom : tout en majuscule
+         * @param {string} nom - Le nom à formater
+         * @returns {string} - Le nom formaté
+         */
+        function formaterNom(nom) {
+            if (!nom) return '';
+            return nom.toUpperCase();
+        }
+
+        // Validation et aperçu en temps réel pour le prénom
+        const prenomInput = document.getElementById('prenom');
+        const prenomHint = document.getElementById('prenomHint');
+
+        prenomInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value) {
+                const formatted = formaterPrenom(value);
+                prenomHint.textContent = `✓ Sera formaté en : ${formatted}`;
+                prenomHint.classList.add('success');
+                prenomHint.classList.remove('error');
+            } else {
+                prenomHint.textContent = 'Sera formaté : Première lettre en majuscule';
+                prenomHint.classList.remove('success', 'error');
+            }
+        });
+
+        // Formatage automatique du prénom à la perte de focus
+        prenomInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                this.value = formaterPrenom(value);
+            }
+        });
+
+        // Validation et aperçu en temps réel pour le nom
+        const nomInput = document.getElementById('nom');
+        const nomHint = document.getElementById('nomHint');
+
+        nomInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            if (value) {
+                const formatted = formaterNom(value);
+                nomHint.textContent = `✓ Sera formaté en : ${formatted}`;
+                nomHint.classList.add('success');
+                nomHint.classList.remove('error');
+            } else {
+                nomHint.textContent = 'Sera formaté : Tout en majuscule';
+                nomHint.classList.remove('success', 'error');
+            }
+        });
+
+        // Formatage automatique du nom à la perte de focus
+        nomInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                this.value = formaterNom(value);
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────────────────
+        // 📞 VALIDATION ET FORMATAGE DU TÉLÉPHONE FRANÇAIS
+        // ──────────────────────────────────────────────────────────────────────────
+
+        /**
+         * Valide et formate un numéro de téléphone français
+         * @param {string} phone - Le numéro à valider
+         * @returns {object} - { valid: boolean, formatted: string, error: string }
+         */
+        function validateAndFormatPhone(phone) {
+            // Si vide, c'est OK (champ facultatif)
+            if (!phone || phone.trim() === '') {
+                return { valid: true, formatted: '', error: '' };
+            }
+
+            // Nettoyer le numéro : enlever espaces, tirets, points, parenthèses
+            let cleaned = phone.replace(/[\s\-\.\(\)]/g, '');
+
+            // Gérer les différents formats d'entrée
+            let digits = '';
+
+            // Format : 0033XXXXXXXXX (13 caractères)
+            if (cleaned.startsWith('0033') && cleaned.length === 13) {
+                digits = cleaned.substring(4); // Enlever 0033
+            }
+            // Format : +33XXXXXXXXX (12 caractères)
+            else if (cleaned.startsWith('+33') && cleaned.length === 12) {
+                digits = cleaned.substring(3); // Enlever +33
+            }
+            // Format : 33XXXXXXXXX (11 caractères, sans + ni 00)
+            else if (cleaned.startsWith('33') && cleaned.length === 11) {
+                digits = cleaned.substring(2); // Enlever 33
+            }
+            // Format : 0XXXXXXXXX (10 caractères, format national)
+            else if (cleaned.startsWith('0') && cleaned.length === 10) {
+                digits = cleaned.substring(1); // Enlever le 0
+            }
+            // Format invalide
+            else {
+                return { 
+                    valid: false, 
+                    formatted: phone, 
+                    error: 'Format invalide. Utilisez : 06 12 34 56 78 ou +33 6 12 34 56 78' 
+                };
+            }
+
+            // Vérifier qu'on a bien 9 chiffres après le préfixe
+            if (digits.length !== 9 || !/^\d{9}$/.test(digits)) {
+                return { 
+                    valid: false, 
+                    formatted: phone, 
+                    error: 'Le numéro doit contenir 10 chiffres' 
+                };
+            }
+
+            // Vérifier que le premier chiffre est valide (1-9 pour la France)
+            const firstDigit = digits.charAt(0);
+            if (!['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(firstDigit)) {
+                return { 
+                    valid: false, 
+                    formatted: phone, 
+                    error: 'Numéro de téléphone français invalide' 
+                };
+            }
+
+            // Formater en +33 X XX XX XX XX
+            const formatted = `+33 ${digits.charAt(0)} ${digits.substring(1, 3)} ${digits.substring(3, 5)} ${digits.substring(5, 7)} ${digits.substring(7, 9)}`;
+
+            return { 
+                valid: true, 
+                formatted: formatted, 
+                error: '' 
+            };
+        }
+
+        // Validation en temps réel du téléphone
+        const phoneInput = document.getElementById('telephone');
+        const phoneHint = document.getElementById('telephoneHint');
+
+        phoneInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (value === '') {
+                this.classList.remove('valid', 'invalid');
+                phoneHint.textContent = 'Format accepté : 06 12 34 56 78 ou +33 6 12 34 56 78';
+                phoneHint.classList.remove('error', 'success');
+                return;
+            }
+
+            const result = validateAndFormatPhone(value);
+
+            if (result.valid && result.formatted) {
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+                phoneHint.textContent = `✓ Sera formaté en : ${result.formatted}`;
+                phoneHint.classList.remove('error');
+                phoneHint.classList.add('success');
+            } else if (!result.valid) {
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+                phoneHint.textContent = `✗ ${result.error}`;
+                phoneHint.classList.remove('success');
+                phoneHint.classList.add('error');
+            }
+        });
+
+        // Formatage automatique lors de la perte de focus
+        phoneInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value === '') return;
+
+            const result = validateAndFormatPhone(value);
+            if (result.valid && result.formatted) {
+                this.value = result.formatted;
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────────────────
+        // 🔧 FONCTIONS UTILITAIRES
+        // ──────────────────────────────────────────────────────────────────────────
+
+        function showError(message) {
+            const errorEl = document.getElementById('error');
+            const successEl = document.getElementById('success');
+            successEl.style.display = 'none';
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => errorEl.style.display = 'none', 5000);
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('success');
+            const errorEl = document.getElementById('error');
+            errorEl.style.display = 'none';
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+            setTimeout(() => successEl.style.display = 'none', 3000);
+        }
+
+        function replaceVariables(template, data) {
+            let result = template;
+
+            // Traitement des blocs conditionnels {{#VARIABLE}}...{{/VARIABLE}}
+            result = result.replace(/\{\{#TELEPHONE\}\}([\s\S]*?)\{\{\/TELEPHONE\}\}/g, function(match, content) {
+                return data.telephone ? content : '';
+            });
+
+            // Remplacement des variables simples
+            result = result
+                .replace(/\{\{PRENOM\}\}/g, data.prenom)
+                .replace(/\{\{NOM\}\}/g, data.nom)
+                .replace(/\{\{ROLE\}\}/g, data.role)
+                .replace(/\{\{EMAIL\}\}/g, data.email)
+                .replace(/\{\{TELEPHONE\}\}/g, data.telephone || '')
+
+            return result;
+        }
+
+        // ──────────────────────────────────────────────────────────────────────────
+        // 📝 GESTION DU FORMULAIRE
+        // ──────────────────────────────────────────────────────────────────────────
+
+        document.getElementById('signatureForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!CONFIG.TEMPLATE.trim()) {
+                showError('Le template est vide. Veuillez ajouter votre template dans CONFIG.TEMPLATE.');
+                return;
+            }
+
+            // Récupérer et valider le téléphone
+            const phoneValue = document.getElementById('telephone').value.trim();
+            const phoneResult = validateAndFormatPhone(phoneValue);
+
+            if (!phoneResult.valid) {
+                showError(`Téléphone invalide : ${phoneResult.error}`);
+                document.getElementById('telephone').focus();
+                return;
+            }
+
+            // Récupérer et formater prénom/nom
+            const prenomBrut = document.getElementById('prenom').value.trim();
+            const nomBrut = document.getElementById('nom').value.trim();
+
+            const data = {
+                prenom: formaterPrenom(prenomBrut),
+                nom: formaterNom(nomBrut),
+                role: document.getElementById('role').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                telephone: phoneResult.formatted, // Utiliser le numéro formaté
+            };
+
+            // Mettre à jour les champs avec les valeurs formatées
+            document.getElementById('prenom').value = data.prenom;
+            document.getElementById('nom').value = data.nom;
+
+            generatedHTML = replaceVariables(CONFIG.TEMPLATE, data);
+
+            // Afficher l'aperçu
+            const previewSection = document.getElementById('previewSection');
+            const previewBox = document.getElementById('previewBox');
+            
+            previewBox.innerHTML = generatedHTML;
+            previewSection.style.display = 'block';
+            document.getElementById('copyBtn').style.display = 'block';
+
+            showSuccess('✅ Signature générée avec succès !');
+            
+            // Scroll vers l'aperçu
+            previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            navigator.clipboard.writeText(generatedHTML).then(() => {
+                showSuccess('📋 Code HTML copié dans le presse-papier !');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = generatedHTML;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('📋 Code HTML copié dans le presse-papier !');
+            });
+        });
+
+    </script>
+</body>
+</html>
